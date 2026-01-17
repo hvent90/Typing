@@ -1,7 +1,10 @@
 // Common English words filtered for single-hand typing practice
 // These are curated for both left-hand and right-hand practice
 
-export const LEFT_HAND_WORDS = [
+import { isLeftHandWord, isRightHandWord } from "./filter.ts";
+
+// Raw word candidates - will be filtered through validation
+const LEFT_HAND_CANDIDATES = [
   // Short words
   "a",
   "be",
@@ -113,7 +116,7 @@ export const LEFT_HAND_WORDS = [
   "wrest",
 ];
 
-export const RIGHT_HAND_WORDS = [
+const RIGHT_HAND_CANDIDATES = [
   // Short words
   "in",
   "on",
@@ -187,6 +190,10 @@ export const RIGHT_HAND_WORDS = [
   "unpin",
   "upon",
 ];
+
+// Validated word lists - all words verified against filter logic
+export const LEFT_HAND_WORDS = LEFT_HAND_CANDIDATES.filter(isLeftHandWord);
+export const RIGHT_HAND_WORDS = RIGHT_HAND_CANDIDATES.filter(isRightHandWord);
 
 export const COMMON_WORDS = [
   // Mix of common words for general practice

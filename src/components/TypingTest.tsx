@@ -2,10 +2,16 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Effect } from "effect";
 import { Keyboard, FingerLegend } from "./Keyboard.tsx";
 import { WordDisplay } from "./WordDisplay.tsx";
+import { WordSkeleton, OfflineNotice } from "./WordSkeleton.tsx";
 import { FingerIndicator } from "./FingerIndicator.tsx";
 import { Hand } from "../core/keyboard/layout.ts";
-import { filterLeftHandWords, filterRightHandWords, getRandomWords } from "../core/words/filter.ts";
+import { getRandomWords } from "../core/words/filter.ts";
 import { LEFT_HAND_WORDS, RIGHT_HAND_WORDS, COMMON_WORDS } from "../core/words/wordlist.ts";
+import {
+  fetchAllWords,
+  fetchLeftHandWords,
+  fetchRightHandWords,
+} from "../core/words/monkeytype.ts";
 import {
   calculateWPM,
   calculateAccuracy,
@@ -24,11 +30,17 @@ interface TestState {
   session: TimingSessionState;
   isComplete: boolean;
   isFocused: boolean;
+  isLoading: boolean;
+  fetchError: string | null;
 }
 
 const WORD_COUNT = 25;
 
-function getWordsForMode(mode: Mode): string[] {
+// Cache fetched words by mode - instant switching after first load
+const wordCache = new Map<Mode, string[]>();
+
+// Get fallback words from static lists
+function getFallbackWords(mode: Mode): string[] {
   switch (mode) {
     case "left":
       return getRandomWords(LEFT_HAND_WORDS, WORD_COUNT);
@@ -39,16 +51,35 @@ function getWordsForMode(mode: Mode): string[] {
   }
 }
 
+// Fetch words from MonkeyType word lists
+async function fetchWordsForMode(mode: Mode): Promise<string[]> {
+  // Use 10k list for more variety (hand modes will filter down significantly)
+  const list = "english_10k";
+
+  switch (mode) {
+    case "left":
+      return Effect.runPromise(fetchLeftHandWords(list));
+    case "right":
+      return Effect.runPromise(fetchRightHandWords(list));
+    default:
+      return Effect.runPromise(fetchAllWords(list));
+  }
+}
+
 function initialState(mode: Mode = "all"): TestState {
+  // Use cached words if available, otherwise start with fallback
+  const cached = wordCache.get(mode);
   return {
     mode,
-    words: getWordsForMode(mode),
+    words: cached ? getRandomWords(cached, WORD_COUNT) : getFallbackWords(mode),
     currentWordIndex: 0,
     currentCharIndex: 0,
     typedChars: new Map(),
     session: TimingSession.create(),
     isComplete: false,
     isFocused: false,
+    isLoading: !cached, // Only loading if not cached
+    fetchError: null,
   };
 }
 
@@ -174,16 +205,41 @@ export function TypingTest() {
   }, []);
 
   const handleModeChange = useCallback((mode: Mode) => {
-    setState(initialState(mode));
+    setState({ ...initialState(mode), isFocused: true });
     inputRef.current?.focus();
   }, []);
 
   const handleRestart = useCallback(() => {
-    setState((prev) => initialState(prev.mode));
+    setState((prev) => ({ ...initialState(prev.mode), isFocused: true }));
     inputRef.current?.focus();
   }, []);
 
-  const focusInput = useCallback(() => {
+  const handleRetry = useCallback(() => {
+    // Clear cache for current mode and refetch
+    wordCache.delete(state.mode);
+    setState((prev) => ({ ...prev, isLoading: true, fetchError: null }));
+
+    fetchWordsForMode(state.mode)
+      .then((words) => {
+        wordCache.set(state.mode, words);
+        setState((prev) => ({
+          ...prev,
+          words: getRandomWords(words, WORD_COUNT),
+          isLoading: false,
+          fetchError: null,
+        }));
+      })
+      .catch(() => {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          fetchError: "offline",
+        }));
+      });
+  }, [state.mode]);
+
+  const focusInput = useCallback((e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent blur from happening
     inputRef.current?.focus();
   }, []);
 
@@ -198,6 +254,53 @@ export function TypingTest() {
     state.session.characterCount > 0
       ? Effect.runSync(calculateAccuracy(state.session.characterCount, state.session.errorCount))
       : 100;
+
+  // Fetch words when mode changes
+  useEffect(() => {
+    let cancelled = false;
+
+    // Check cache first - instant if available
+    const cached = wordCache.get(state.mode);
+    if (cached) {
+      setState((prev) => ({
+        ...prev,
+        words: getRandomWords(cached, WORD_COUNT),
+        isLoading: false,
+        fetchError: null,
+      }));
+      return;
+    }
+
+    setState((prev) => ({ ...prev, isLoading: true, fetchError: null }));
+
+    fetchWordsForMode(state.mode)
+      .then((words) => {
+        if (!cancelled) {
+          wordCache.set(state.mode, words); // Cache for later
+          setState((prev) => ({
+            ...prev,
+            words: getRandomWords(words, WORD_COUNT),
+            isLoading: false,
+          }));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          // Fallback to static list
+          const fallback = getFallbackWords(state.mode);
+          setState((prev) => ({
+            ...prev,
+            words: fallback,
+            isLoading: false,
+            fetchError: "offline",
+          }));
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.mode]);
 
   // Auto-focus on mount
   useEffect(() => {
@@ -236,24 +339,27 @@ export function TypingTest() {
         <button
           className={`mode-btn ${state.mode === "all" ? "active" : ""}`}
           onClick={() => handleModeChange("all")}
+          onMouseDown={(e) => e.preventDefault()}
         >
           all words
         </button>
         <button
           className={`mode-btn ${state.mode === "left" ? "active" : ""}`}
           onClick={() => handleModeChange("left")}
+          onMouseDown={(e) => e.preventDefault()}
         >
           left hand
         </button>
         <button
           className={`mode-btn ${state.mode === "right" ? "active" : ""}`}
           onClick={() => handleModeChange("right")}
+          onMouseDown={(e) => e.preventDefault()}
         >
           right hand
         </button>
       </div>
 
-      <div className="typing-area" onClick={focusInput}>
+      <div className="typing-area" onMouseDown={focusInput}>
         <input
           ref={inputRef}
           type="text"
@@ -270,16 +376,25 @@ export function TypingTest() {
         {!state.isFocused && !state.isComplete && (
           <div className="focus-message">Click here or press any key to focus</div>
         )}
-        {state.mode !== "all" && (
+        {state.mode !== "all" && !state.isLoading && (
           <FingerIndicator currentChar={currentChar} mode={state.mode} />
         )}
-        <WordDisplay
-          words={state.words}
-          currentWordIndex={state.currentWordIndex}
-          currentCharIndex={state.currentCharIndex}
-          typedChars={state.typedChars}
-          showFingerHints={state.mode !== "all"}
-        />
+        {state.isLoading ? (
+          <WordSkeleton />
+        ) : (
+          <>
+            {state.fetchError && <OfflineNotice onRetry={handleRetry} />}
+            <div className="words-enter">
+              <WordDisplay
+                words={state.words}
+                currentWordIndex={state.currentWordIndex}
+                currentCharIndex={state.currentCharIndex}
+                typedChars={state.typedChars}
+                showFingerHints={state.mode !== "all"}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {state.isComplete && (
@@ -299,14 +414,14 @@ export function TypingTest() {
               <div className="stat-label">time</div>
             </div>
           </div>
-          <button className="btn" onClick={handleRestart}>
+          <button className="btn" onClick={handleRestart} onMouseDown={(e) => e.preventDefault()}>
             Try Again
           </button>
         </div>
       )}
 
       <div className="controls">
-        <button className="btn btn-secondary" onClick={handleRestart}>
+        <button className="btn btn-secondary" onClick={handleRestart} onMouseDown={(e) => e.preventDefault()}>
           Restart
         </button>
       </div>

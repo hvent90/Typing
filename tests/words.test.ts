@@ -8,6 +8,7 @@ import {
   getRandomWords,
 } from "../src/core/words/filter.ts";
 import { Hand } from "../src/core/keyboard/layout.ts";
+import { LEFT_HAND_WORDS, RIGHT_HAND_WORDS } from "../src/core/words/wordlist.ts";
 
 describe("Word Filtering", () => {
   describe("isLeftHandWord", () => {
@@ -104,6 +105,26 @@ describe("Word Filtering", () => {
     test("returns empty array for empty input", () => {
       const result = getRandomWords([], 5);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe("Static Word Lists Validation", () => {
+    test("LEFT_HAND_WORDS contains only valid left-hand words", () => {
+      const invalidWords = LEFT_HAND_WORDS.filter((word) => !isLeftHandWord(word));
+      expect(invalidWords).toEqual([]);
+    });
+
+    test("RIGHT_HAND_WORDS contains only valid right-hand words", () => {
+      const invalidWords = RIGHT_HAND_WORDS.filter((word) => !isRightHandWord(word));
+      expect(invalidWords).toEqual([]);
+    });
+
+    test("LEFT_HAND_WORDS has sufficient words for practice", () => {
+      expect(LEFT_HAND_WORDS.length).toBeGreaterThanOrEqual(25);
+    });
+
+    test("RIGHT_HAND_WORDS has sufficient words for practice", () => {
+      expect(RIGHT_HAND_WORDS.length).toBeGreaterThanOrEqual(25);
     });
   });
 });

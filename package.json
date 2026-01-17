@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --hot src/server.ts",
+    "dev:watch": "bun --watch src/server.ts",
     "build": "bun build ./index.html --outdir dist --minify",
     "test": "bun test",
     "format": "bunx oxfmt --write .",
