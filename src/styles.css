@@ -1,0 +1,409 @@
+/* CSS Reset and Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Colors */
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-tertiary: #0f3460;
+  --text-primary: #e8e8e8;
+  --text-secondary: #8b8b8b;
+  --text-muted: #555;
+  --accent: #e94560;
+  --success: #22c55e;
+  --error: #ef4444;
+
+  /* Finger colors */
+  --finger-pinky: #ef4444;
+  --finger-ring: #f97316;
+  --finger-middle: #eab308;
+  --finger-index: #22c55e;
+  --finger-thumb: #3b82f6;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Typography */
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font-mono);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-xl);
+}
+
+.header {
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.header p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-xs);
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  gap: var(--spacing-xl);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Mode selector */
+.mode-selector {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.mode-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(233, 69, 96, 0.1);
+}
+
+/* Typing area */
+.typing-area {
+  width: 100%;
+  max-width: 900px;
+  padding: var(--spacing-xl);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--bg-tertiary);
+}
+
+.words-display {
+  font-size: 1.5rem;
+  line-height: 2;
+  min-height: 120px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  user-select: none;
+}
+
+.word {
+  display: inline-flex;
+}
+
+.letter {
+  display: inline-block;
+  transition: color 0.1s ease;
+}
+
+.letter.current {
+  border-bottom: 2px solid var(--accent);
+}
+
+.letter.correct {
+  color: var(--text-primary);
+}
+
+.letter.incorrect {
+  color: var(--error);
+}
+
+.letter.pending {
+  color: var(--text-muted);
+}
+
+/* Finger hint colors */
+.letter.finger-pinky {
+  color: var(--finger-pinky);
+}
+.letter.finger-ring {
+  color: var(--finger-ring);
+}
+.letter.finger-middle {
+  color: var(--finger-middle);
+}
+.letter.finger-index {
+  color: var(--finger-index);
+}
+
+.letter.pending.finger-pinky {
+  color: color-mix(in srgb, var(--finger-pinky) 60%, transparent);
+}
+.letter.pending.finger-ring {
+  color: color-mix(in srgb, var(--finger-ring) 60%, transparent);
+}
+.letter.pending.finger-middle {
+  color: color-mix(in srgb, var(--finger-middle) 60%, transparent);
+}
+.letter.pending.finger-index {
+  color: color-mix(in srgb, var(--finger-index) 60%, transparent);
+}
+
+.hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Keyboard */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--bg-tertiary);
+}
+
+.keyboard-row {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: center;
+}
+
+.keyboard-row:nth-child(2) {
+  margin-left: 20px;
+}
+
+.keyboard-row:nth-child(3) {
+  margin-left: 40px;
+}
+
+.key {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid #333;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: all 0.1s ease;
+}
+
+.key:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.key.active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.key.finger-pinky {
+  background: color-mix(in srgb, var(--finger-pinky) 30%, var(--bg-tertiary));
+  border-color: var(--finger-pinky);
+}
+.key.finger-ring {
+  background: color-mix(in srgb, var(--finger-ring) 30%, var(--bg-tertiary));
+  border-color: var(--finger-ring);
+}
+.key.finger-middle {
+  background: color-mix(in srgb, var(--finger-middle) 30%, var(--bg-tertiary));
+  border-color: var(--finger-middle);
+}
+.key.finger-index {
+  background: color-mix(in srgb, var(--finger-index) 30%, var(--bg-tertiary));
+  border-color: var(--finger-index);
+}
+
+/* Spacebar */
+.key.spacebar {
+  width: 300px;
+  background: color-mix(in srgb, var(--finger-thumb) 30%, var(--bg-tertiary));
+  border-color: var(--finger-thumb);
+}
+
+/* Finger legend */
+.finger-legend {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--accent) 80%, white);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+}
+
+.btn-secondary:hover {
+  background: color-mix(in srgb, var(--bg-tertiary) 80%, white);
+}
+
+/* Results */
+.results {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--bg-tertiary);
+}
+
+.results h2 {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+.results-stats {
+  display: flex;
+  gap: var(--spacing-xl);
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Focus indicator */
+.typing-area:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+}
+
+/* Click to focus message */
+.focus-message {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  padding: var(--spacing-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app {
+    padding: var(--spacing-md);
+  }
+
+  .words-display {
+    font-size: 1.25rem;
+  }
+
+  .key {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+  }
+
+  .key.spacebar {
+    width: 200px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+}
