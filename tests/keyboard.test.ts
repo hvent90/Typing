@@ -129,12 +129,12 @@ describe("Keyboard Layout", () => {
   describe("FINGER_COLORS", () => {
     test("has colors for all fingers", () => {
       expect(FINGER_COLORS[Finger.LeftPinky]).toBe("#ef4444");
-      expect(FINGER_COLORS[Finger.LeftRing]).toBe("#f97316");
+      expect(FINGER_COLORS[Finger.LeftRing]).toBe("#3b82f6");
       expect(FINGER_COLORS[Finger.LeftMiddle]).toBe("#eab308");
       expect(FINGER_COLORS[Finger.LeftIndex]).toBe("#22c55e");
       expect(FINGER_COLORS[Finger.RightIndex]).toBe("#22c55e");
       expect(FINGER_COLORS[Finger.RightMiddle]).toBe("#eab308");
-      expect(FINGER_COLORS[Finger.RightRing]).toBe("#f97316");
+      expect(FINGER_COLORS[Finger.RightRing]).toBe("#3b82f6");
       expect(FINGER_COLORS[Finger.RightPinky]).toBe("#ef4444");
     });
   });

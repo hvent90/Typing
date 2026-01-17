@@ -140,8 +140,9 @@ bun run typecheck
 - Pinky: P, ;, /, 0, -, =, [, ], \, '
 
 ### Finger Color Scheme
+Colors are chosen so adjacent fingers have distinct, non-similar colors:
 - Pinky: Red (#ef4444)
-- Ring: Orange (#f97316)
+- Ring: Blue (#3b82f6)
 - Middle: Yellow (#eab308)
 - Index: Green (#22c55e)
-- Thumb: Blue (#3b82f6)
+- Thumb: Purple (#a855f7)

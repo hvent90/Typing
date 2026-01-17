@@ -17,14 +17,14 @@ export enum Finger {
 
 export const FINGER_COLORS: Record<Finger, string> = {
   [Finger.LeftPinky]: "#ef4444",
-  [Finger.LeftRing]: "#f97316",
+  [Finger.LeftRing]: "#3b82f6",
   [Finger.LeftMiddle]: "#eab308",
   [Finger.LeftIndex]: "#22c55e",
   [Finger.RightIndex]: "#22c55e",
   [Finger.RightMiddle]: "#eab308",
-  [Finger.RightRing]: "#f97316",
+  [Finger.RightRing]: "#3b82f6",
   [Finger.RightPinky]: "#ef4444",
-  [Finger.Thumb]: "#3b82f6",
+  [Finger.Thumb]: "#a855f7",
 };
 
 const KEY_TO_FINGER: Record<string, Finger> = {
