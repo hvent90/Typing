@@ -289,6 +289,13 @@ body {
   border-color: var(--finger-thumb);
 }
 
+/* Disabled keys (for single-hand modes) */
+.key.disabled {
+  opacity: 0.25;
+  background: var(--bg-tertiary);
+  border-color: #333;
+}
+
 /* Finger legend */
 .finger-legend {
   display: flex;

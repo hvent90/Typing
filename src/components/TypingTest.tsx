@@ -307,8 +307,8 @@ export function TypingTest() {
         </button>
       </div>
 
-      <Keyboard activeKey={currentChar} showFingerColors={true} />
-      <FingerLegend />
+      <Keyboard activeKey={currentChar} showFingerColors={true} mode={state.mode} />
+      {state.mode !== "all" && <FingerLegend mode={state.mode} />}
     </div>
   );
 }
