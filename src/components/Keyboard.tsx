@@ -1,9 +1,12 @@
 import React from "react";
-import { Finger, getFingerForKey } from "../core/keyboard/layout.ts";
+import { Finger, getFingerForKey, getHandForKey, Hand } from "../core/keyboard/layout.ts";
+
+type Mode = "all" | "left" | "right";
 
 interface KeyboardProps {
   activeKey?: string;
   showFingerColors?: boolean;
+  mode?: Mode;
 }
 
 const ROWS = [
@@ -32,8 +35,16 @@ function getFingerClass(finger: Finger | undefined): string {
   }
 }
 
-export function Keyboard({ activeKey, showFingerColors = true }: KeyboardProps) {
+export function Keyboard({ activeKey, showFingerColors = true, mode = "all" }: KeyboardProps) {
   const activeKeyLower = activeKey?.toLowerCase();
+
+  const isKeyDisabled = (key: string): boolean => {
+    if (mode === "all") return false;
+    const keyHand = getHandForKey(key);
+    if (mode === "left") return keyHand !== Hand.Left;
+    if (mode === "right") return keyHand !== Hand.Right;
+    return false;
+  };
 
   return (
     <div className="keyboard">
@@ -43,9 +54,13 @@ export function Keyboard({ activeKey, showFingerColors = true }: KeyboardProps) 
             const finger = getFingerForKey(key);
             const fingerClass = showFingerColors ? getFingerClass(finger) : "";
             const isActive = activeKeyLower === key;
+            const isDisabled = isKeyDisabled(key);
 
             return (
-              <div key={key} className={`key ${fingerClass} ${isActive ? "active" : ""}`}>
+              <div
+                key={key}
+                className={`key ${fingerClass} ${isActive ? "active" : ""} ${isDisabled ? "disabled" : ""}`}
+              >
                 {key}
               </div>
             );
@@ -59,19 +74,32 @@ export function Keyboard({ activeKey, showFingerColors = true }: KeyboardProps) 
   );
 }
 
-export function FingerLegend() {
-  const fingers = [
+interface FingerLegendProps {
+  mode?: Mode;
+}
+
+export function FingerLegend({ mode = "all" }: FingerLegendProps) {
+  // Finger order matches left-to-right on keyboard for each hand
+  const leftHandFingers = [
     { name: "Pinky", color: "var(--finger-pinky)" },
     { name: "Ring", color: "var(--finger-ring)" },
     { name: "Middle", color: "var(--finger-middle)" },
     { name: "Index", color: "var(--finger-index)" },
-    { name: "Thumb", color: "var(--finger-thumb)" },
   ];
+
+  const rightHandFingers = [
+    { name: "Index", color: "var(--finger-index)" },
+    { name: "Middle", color: "var(--finger-middle)" },
+    { name: "Ring", color: "var(--finger-ring)" },
+    { name: "Pinky", color: "var(--finger-pinky)" },
+  ];
+
+  const fingers = mode === "right" ? rightHandFingers : leftHandFingers;
 
   return (
     <div className="finger-legend">
-      {fingers.map((finger) => (
-        <div key={finger.name} className="legend-item">
+      {fingers.map((finger, index) => (
+        <div key={`${finger.name}-${index}`} className="legend-item">
           <div className="legend-color" style={{ backgroundColor: finger.color }} />
           <span>{finger.name}</span>
         </div>
