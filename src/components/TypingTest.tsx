@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Effect } from "effect";
 import { Keyboard, FingerLegend } from "./Keyboard.tsx";
 import { WordDisplay } from "./WordDisplay.tsx";
+import { FingerIndicator } from "./FingerIndicator.tsx";
 import { Hand } from "../core/keyboard/layout.ts";
 import { filterLeftHandWords, filterRightHandWords, getRandomWords } from "../core/words/filter.ts";
 import { LEFT_HAND_WORDS, RIGHT_HAND_WORDS, COMMON_WORDS } from "../core/words/wordlist.ts";
@@ -268,6 +269,9 @@ export function TypingTest() {
         />
         {!state.isFocused && !state.isComplete && (
           <div className="focus-message">Click here or press any key to focus</div>
+        )}
+        {state.mode !== "all" && (
+          <FingerIndicator currentChar={currentChar} mode={state.mode} />
         )}
         <WordDisplay
           words={state.words}

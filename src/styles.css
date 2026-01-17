@@ -19,12 +19,12 @@
   --success: #22c55e;
   --error: #ef4444;
 
-  /* Finger colors */
+  /* Finger colors - distinct colors for adjacent fingers */
   --finger-pinky: #ef4444;
-  --finger-ring: #f97316;
+  --finger-ring: #3b82f6;
   --finger-middle: #eab308;
   --finger-index: #22c55e;
-  --finger-thumb: #3b82f6;
+  --finger-thumb: #a855f7;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -294,6 +294,47 @@ body {
   opacity: 0.25;
   background: var(--bg-tertiary);
   border-color: #333;
+}
+
+/* Finger indicator - above typing area */
+.finger-indicator {
+  display: flex;
+  gap: var(--spacing-lg);
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.finger-label {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.finger-label.inactive {
+  opacity: 0.2;
+}
+
+.finger-label.active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.finger-label.finger-pinky {
+  color: var(--finger-pinky);
+}
+
+.finger-label.finger-ring {
+  color: var(--finger-ring);
+}
+
+.finger-label.finger-middle {
+  color: var(--finger-middle);
+}
+
+.finger-label.finger-index {
+  color: var(--finger-index);
 }
 
 /* Finger legend */
