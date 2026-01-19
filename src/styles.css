@@ -8,23 +8,44 @@
 }
 
 :root {
-  /* Colors */
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-tertiary: #0f3460;
-  --text-primary: #e8e8e8;
-  --text-secondary: #8b8b8b;
-  --text-muted: #555;
-  --accent: #e94560;
-  --success: #22c55e;
-  --error: #ef4444;
+  /* Zen Flow base - deep forest greens with sage accents */
+  --bg-primary: #1a2421;
+  --bg-secondary: rgba(167, 173, 141, 0.03);
+  --bg-tertiary: rgba(167, 173, 141, 0.06);
+  --text-primary: #a7ad8d;
+  --text-secondary: #6b7a5f;
+  --text-muted: #3d4a3a;
+  --text-ghost: rgba(167, 173, 141, 0.18);
+  --accent: #d4af37;
+  --accent-glow: rgba(212, 175, 55, 0.25);
+  --success: #7cb97c;
+  --error: #c9635a;
 
-  /* Finger colors - distinct colors for adjacent fingers */
-  --finger-pinky: #ef4444;
-  --finger-ring: #3b82f6;
-  --finger-middle: #eab308;
-  --finger-index: #22c55e;
-  --finger-thumb: #a855f7;
+  /* Finger colors - BOLD and distinct for learning (critical for usability) */
+  --finger-pinky: #f87171;
+  --finger-ring: #60a5fa;
+  --finger-middle: #facc15;
+  --finger-index: #4ade80;
+  --finger-thumb: #c084fc;
+
+  /* Finger colors with zen glow */
+  --finger-pinky-glow: rgba(248, 113, 113, 0.4);
+  --finger-ring-glow: rgba(96, 165, 250, 0.4);
+  --finger-middle-glow: rgba(250, 204, 21, 0.4);
+  --finger-index-glow: rgba(74, 222, 128, 0.4);
+  --finger-thumb-glow: rgba(192, 132, 252, 0.4);
+
+  /* Finger colors muted for pending state */
+  --finger-pinky-muted: rgba(248, 113, 113, 0.5);
+  --finger-ring-muted: rgba(96, 165, 250, 0.5);
+  --finger-middle-muted: rgba(250, 204, 21, 0.5);
+  --finger-index-muted: rgba(74, 222, 128, 0.5);
+
+  /* Progressive fade opacities for upcoming words - kept readable for fast typing */
+  --fade-1: 0.65;
+  --fade-2: 0.45;
+  --fade-3: 0.30;
+  --fade-4: 0.18;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -32,19 +53,27 @@
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
 
-  /* Typography */
-  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
-  --font-sans: system-ui, -apple-system, sans-serif;
+  /* Typography - Zen Flow fonts */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-sans: "Quicksand", system-ui, sans-serif;
+
+  /* Ambient glow - sage and gold */
+  --glow-primary: rgba(167, 173, 141, 0.25);
+  --glow-secondary: rgba(212, 175, 55, 0.15);
 }
 
 html,
 body {
   height: 100%;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  overflow-x: hidden;
+  transition: background-color 0.5s ease;
 }
 
 #root {
@@ -55,107 +84,204 @@ body {
 
 /* Layout */
 .app {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: var(--spacing-xl);
-  gap: var(--spacing-xl);
+  padding: var(--spacing-2xl);
+  gap: var(--spacing-md);
 }
 
+/* Zen ambient background blurs - larger, more atmospheric */
+.app::before,
+.app::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.app::before {
+  top: 10%;
+  left: 5%;
+  width: 380px;
+  height: 380px;
+  background: var(--glow-primary);
+  filter: blur(150px);
+  opacity: 0.9;
+}
+
+.app::after {
+  bottom: 10%;
+  right: 5%;
+  width: 550px;
+  height: 550px;
+  background: var(--glow-secondary);
+  filter: blur(180px);
+  opacity: 0.85;
+}
+
+/* Header - Zen typography with elegant italic serif */
 .header {
   text-align: center;
+  margin-bottom: var(--spacing-md);
 }
 
 .header h1 {
-  font-size: 2rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 400;
+  font-style: italic;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--spacing-xs);
+  text-shadow: 0 0 50px rgba(167, 173, 141, 0.25);
 }
 
 .header p {
+  font-size: 0.55rem;
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  margin-top: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.45em;
+  opacity: 0.45;
 }
 
-/* Stats */
+/* Stats - elegant corner positioned with Zen typography */
 .stats {
+  position: fixed;
+  top: var(--spacing-xl);
+  left: var(--spacing-2xl);
   display: flex;
-  gap: var(--spacing-xl);
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  opacity: 0.55;
+  transition: opacity 0.35s ease;
+  z-index: 10;
+}
+
+.stats:hover {
+  opacity: 1;
+}
+
+.stats-right {
+  position: fixed;
+  top: var(--spacing-xl);
+  right: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+  opacity: 0.55;
+  transition: opacity 0.35s ease;
+  z-index: 10;
+}
+
+.stats-right:hover {
+  opacity: 1;
 }
 
 .stat {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--accent);
+.stat-right {
+  text-align: right;
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.5rem;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.35em;
+  opacity: 0.55;
 }
 
-/* Mode selector */
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.stat-value span {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-style: normal;
+  opacity: 0.55;
+}
+
+/* Mode selector - elegant underlined tabs */
 .mode-selector {
   display: flex;
-  gap: var(--spacing-sm);
-  flex-wrap: wrap;
+  gap: var(--spacing-xl);
   justify-content: center;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-top: var(--spacing-sm);
 }
 
 .mode-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--bg-secondary);
-  border: 1px solid var(--bg-tertiary);
-  border-radius: 4px;
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
+  padding: var(--spacing-xs) 0;
+  padding-bottom: 6px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: inherit;
+  letter-spacing: inherit;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.25s ease;
+  opacity: 0.5;
 }
 
 .mode-btn:hover {
-  color: var(--text-primary);
-  border-color: var(--text-secondary);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  opacity: 0.8;
 }
 
 .mode-btn.active {
   color: var(--accent);
-  border-color: var(--accent);
-  background: rgba(233, 69, 96, 0.1);
+  border-bottom-color: var(--accent);
+  opacity: 1;
 }
 
-/* Typing area */
+/* Typing area - clean zen container */
 .typing-area {
   position: relative;
   width: 100%;
   max-width: 900px;
-  padding: var(--spacing-xl);
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  border: 1px solid var(--bg-tertiary);
+  padding: var(--spacing-xl) var(--spacing-xl);
+  background: transparent;
+  border: none;
+  border-radius: 2rem;
 }
 
+.typing-area:focus-within {
+  /* Subtle glow on focus */
+}
+
+/* Words display - centered zen typography */
 .words-display {
-  font-size: 1.5rem;
-  line-height: 2;
-  min-height: 120px;
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 2.2;
+  min-height: 140px;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: 0.4em;
+  justify-content: center;
+  align-items: center;
   user-select: none;
+  letter-spacing: 0.02em;
 }
 
 .word {
@@ -165,50 +291,301 @@ body {
 .letter {
   display: inline-block;
   line-height: 1.2;
-  transition: color 0.1s ease;
+  transition: color 0.12s ease, opacity 0.12s ease, text-shadow 0.12s ease;
 }
 
+/* Current letter indicator - zen cursor */
 .letter.current {
-  border-bottom: 2px solid var(--accent);
+  position: relative;
 }
 
-.letter.correct {
-  color: var(--text-primary);
+.letter.current::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  bottom: 0.1em;
+  width: 2px;
+  background: var(--text-primary);
+  animation: cursor-blink 1s step-end infinite;
+  box-shadow: 0 0 8px rgba(167, 173, 141, 0.4);
 }
 
-.letter.incorrect {
-  color: var(--error);
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
+/* Letter base pending state */
 .letter.pending {
   color: var(--text-muted);
 }
 
-/* Finger hint colors */
+/* Progressive fade for future words */
+.word.fade-1 .letter.pending { opacity: var(--fade-1); }
+.word.fade-2 .letter.pending { opacity: var(--fade-2); }
+.word.fade-3 .letter.pending { opacity: var(--fade-3); }
+.word.fade-4 .letter.pending { opacity: var(--fade-4); }
+
+/* Typed words - subtle completed state */
+.word.typed .letter {
+  opacity: 0.5;
+}
+
+/* Finger hint colors - BOLD for learning (critical usability feature) */
 .letter.finger-pinky {
   color: var(--finger-pinky);
+  text-shadow: 0 0 18px var(--finger-pinky-glow);
 }
 .letter.finger-ring {
   color: var(--finger-ring);
+  text-shadow: 0 0 18px var(--finger-ring-glow);
 }
 .letter.finger-middle {
   color: var(--finger-middle);
+  text-shadow: 0 0 18px var(--finger-middle-glow);
 }
 .letter.finger-index {
   color: var(--finger-index);
+  text-shadow: 0 0 18px var(--finger-index-glow);
 }
 
+/* Pending state with finger colors - muted but still visible */
 .letter.pending.finger-pinky {
-  color: color-mix(in srgb, var(--finger-pinky) 60%, transparent);
+  color: var(--finger-pinky-muted);
+  text-shadow: none;
 }
 .letter.pending.finger-ring {
-  color: color-mix(in srgb, var(--finger-ring) 60%, transparent);
+  color: var(--finger-ring-muted);
+  text-shadow: none;
 }
 .letter.pending.finger-middle {
-  color: color-mix(in srgb, var(--finger-middle) 60%, transparent);
+  color: var(--finger-middle-muted);
+  text-shadow: none;
 }
 .letter.pending.finger-index {
-  color: color-mix(in srgb, var(--finger-index) 60%, transparent);
+  color: var(--finger-index-muted);
+  text-shadow: none;
+}
+
+/* Typed letter states - MUST come after finger colors to override them */
+.letter.correct {
+  color: var(--text-primary) !important;
+  text-shadow: 0 0 18px rgba(167, 173, 141, 0.3) !important;
+}
+
+.letter.incorrect {
+  color: var(--error) !important;
+  text-shadow: 0 0 14px rgba(201, 99, 90, 0.55) !important;
+}
+
+/* Inline Key Hint - floating beneath current letter */
+.inline-key-hint {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  z-index: 100;
+  pointer-events: none;
+  animation: key-hint-appear 0.15s ease-out;
+}
+
+@keyframes key-hint-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.inline-key-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: rgba(26, 36, 33, 0.95);
+  backdrop-filter: blur(12px);
+  border: 2px solid currentColor;
+  box-shadow:
+    0 0 24px currentColor,
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: key-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes key-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 24px currentColor,
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 36px currentColor,
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+}
+
+.inline-key-finger {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+}
+
+/* Finger colors for inline hint */
+.inline-key-hint.finger-pinky {
+  color: var(--finger-pinky);
+}
+.inline-key-hint.finger-ring {
+  color: var(--finger-ring);
+}
+.inline-key-hint.finger-middle {
+  color: var(--finger-middle);
+}
+.inline-key-hint.finger-index {
+  color: var(--finger-index);
+}
+
+/* Ensure current letter can contain positioned children */
+.letter.current {
+  position: relative;
+}
+
+/* Inline Half-Keyboard - positioned directly under words */
+.inline-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  margin-top: var(--spacing-md);
+  background: rgba(26, 36, 33, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(167, 173, 141, 0.1);
+  border-radius: 20px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.inline-keyboard-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* Stagger rows like a real keyboard */
+.inline-keyboard-left .inline-keyboard-row:nth-child(2) {
+  margin-left: 12px;
+}
+.inline-keyboard-left .inline-keyboard-row:nth-child(3) {
+  margin-left: 24px;
+}
+
+.inline-keyboard-right .inline-keyboard-row:nth-child(2) {
+  margin-right: 12px;
+}
+.inline-keyboard-right .inline-keyboard-row:nth-child(3) {
+  margin-right: 24px;
+}
+
+.inline-key {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(167, 173, 141, 0.15);
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: all 0.12s ease;
+}
+
+/* Finger-colored inline keys */
+.inline-key.finger-pinky {
+  border-color: var(--finger-pinky);
+  color: var(--finger-pinky);
+  background: rgba(248, 113, 113, 0.08);
+}
+.inline-key.finger-ring {
+  border-color: var(--finger-ring);
+  color: var(--finger-ring);
+  background: rgba(96, 165, 250, 0.08);
+}
+.inline-key.finger-middle {
+  border-color: var(--finger-middle);
+  color: var(--finger-middle);
+  background: rgba(250, 204, 21, 0.08);
+}
+.inline-key.finger-index {
+  border-color: var(--finger-index);
+  color: var(--finger-index);
+  background: rgba(74, 222, 128, 0.08);
+}
+
+/* Active key - glowing prominently */
+.inline-key.active {
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+.inline-key.finger-pinky.active {
+  background: rgba(248, 113, 113, 0.5);
+  box-shadow: 0 0 28px var(--finger-pinky-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: var(--finger-pinky);
+}
+.inline-key.finger-ring.active {
+  background: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 28px var(--finger-ring-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: var(--finger-ring);
+}
+.inline-key.finger-middle.active {
+  background: rgba(250, 204, 21, 0.5);
+  box-shadow: 0 0 28px var(--finger-middle-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: var(--finger-middle);
+}
+.inline-key.finger-index.active {
+  background: rgba(74, 222, 128, 0.5);
+  box-shadow: 0 0 28px var(--finger-index-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: var(--finger-index);
+}
+
+/* Inline spacebar */
+.inline-spacebar {
+  width: 160px;
+  border-color: var(--finger-thumb);
+  color: var(--finger-thumb);
+  background: rgba(192, 132, 252, 0.08);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+}
+
+.inline-spacebar.active {
+  background: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 0 28px var(--finger-thumb-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .hidden-input {
@@ -217,110 +594,146 @@ body {
   pointer-events: none;
 }
 
-/* Keyboard */
+/* Ghost Keyboard - Zen style with bold finger colors */
 .keyboard {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 5px;
   padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  border: 1px solid var(--bg-tertiary);
+  opacity: 0.7;
+  transform: scale(0.88);
+  margin-top: var(--spacing-lg);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.keyboard:hover {
+  opacity: 0.9;
+  transform: scale(0.92);
 }
 
 .keyboard-row {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: 5px;
   justify-content: center;
 }
 
 .keyboard-row:nth-child(2) {
-  margin-left: 20px;
+  margin-left: 16px;
 }
 
 .keyboard-row:nth-child(3) {
-  margin-left: 40px;
+  margin-left: 32px;
 }
 
 .key {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-tertiary);
-  border: 1px solid #333;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(167, 173, 141, 0.12);
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
   font-weight: 500;
   text-transform: uppercase;
-  transition: all 0.1s ease;
+  color: var(--text-muted);
+  transition: all 0.12s ease;
 }
 
-.key:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.key.active {
-  transform: translateY(1px);
-  box-shadow: none;
-}
-
+/* Finger-colored keys - bold borders for learning */
 .key.finger-pinky {
-  background: color-mix(in srgb, var(--finger-pinky) 30%, var(--bg-tertiary));
   border-color: var(--finger-pinky);
+  color: var(--finger-pinky);
+  background: rgba(248, 113, 113, 0.05);
 }
 .key.finger-ring {
-  background: color-mix(in srgb, var(--finger-ring) 30%, var(--bg-tertiary));
   border-color: var(--finger-ring);
+  color: var(--finger-ring);
+  background: rgba(96, 165, 250, 0.05);
 }
 .key.finger-middle {
-  background: color-mix(in srgb, var(--finger-middle) 30%, var(--bg-tertiary));
   border-color: var(--finger-middle);
+  color: var(--finger-middle);
+  background: rgba(250, 204, 21, 0.05);
 }
 .key.finger-index {
-  background: color-mix(in srgb, var(--finger-index) 30%, var(--bg-tertiary));
   border-color: var(--finger-index);
+  color: var(--finger-index);
+  background: rgba(74, 222, 128, 0.05);
+}
+
+/* Active key - glowing intensely */
+.key.active {
+  transform: scale(0.9);
+}
+
+.key.finger-pinky.active {
+  background: rgba(248, 113, 113, 0.4);
+  box-shadow: 0 0 20px var(--finger-pinky-glow);
+}
+.key.finger-ring.active {
+  background: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 0 20px var(--finger-ring-glow);
+}
+.key.finger-middle.active {
+  background: rgba(250, 204, 21, 0.4);
+  box-shadow: 0 0 20px var(--finger-middle-glow);
+}
+.key.finger-index.active {
+  background: rgba(74, 222, 128, 0.4);
+  box-shadow: 0 0 20px var(--finger-index-glow);
 }
 
 /* Spacebar */
 .key.spacebar {
-  width: 300px;
-  background: color-mix(in srgb, var(--finger-thumb) 30%, var(--bg-tertiary));
+  width: 200px;
   border-color: var(--finger-thumb);
+  color: var(--finger-thumb);
+  background: rgba(192, 132, 252, 0.05);
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+}
+
+.key.spacebar.active {
+  background: rgba(192, 132, 252, 0.4);
+  box-shadow: 0 0 20px var(--finger-thumb-glow);
 }
 
 /* Disabled keys (for single-hand modes) */
 .key.disabled {
-  opacity: 0.25;
-  background: var(--bg-tertiary);
-  border-color: #333;
+  opacity: 0.1;
+  background: transparent;
+  border-color: rgba(167, 173, 141, 0.06);
+  color: var(--text-muted);
 }
 
-/* Finger indicator - above typing area */
+/* Finger indicator - elegant labels above typing */
 .finger-indicator {
   display: flex;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-xl);
   justify-content: center;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .finger-label {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  letter-spacing: 0.12em;
+  transition: opacity 0.15s ease;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 8px;
 }
 
 .finger-label.inactive {
-  opacity: 0.2;
+  opacity: 0.18;
 }
 
 .finger-label.active {
   opacity: 1;
-  transform: scale(1.1);
 }
 
 .finger-label.finger-pinky {
@@ -339,14 +752,18 @@ body {
   color: var(--finger-index);
 }
 
-/* Finger legend */
+/* Finger legend - minimal zen style */
 .finger-legend {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
   justify-content: center;
   flex-wrap: wrap;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.5;
+  margin-top: var(--spacing-sm);
 }
 
 .legend-item {
@@ -356,146 +773,154 @@ body {
 }
 
 .legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
-/* Controls */
+/* Controls - minimal zen icon buttons */
 .controls {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-xl);
   align-items: center;
+  margin-top: var(--spacing-lg);
 }
 
 .btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--accent);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
   border: none;
-  border-radius: 4px;
-  color: white;
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.25s ease;
+  opacity: 0.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
 }
 
 .btn:hover {
-  background: color-mix(in srgb, var(--accent) 80%, white);
-  transform: translateY(-1px);
-}
-
-.btn:active {
-  transform: translateY(0);
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+  opacity: 1;
 }
 
 .btn-secondary {
-  background: var(--bg-tertiary);
+  background: transparent;
 }
 
-.btn-secondary:hover {
-  background: color-mix(in srgb, var(--bg-tertiary) 80%, white);
+/* Text button variant */
+.btn-text {
+  width: auto;
+  height: auto;
+  border-radius: 2rem;
+  padding: var(--spacing-xs) var(--spacing-lg);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
-/* Results */
+/* Material Symbols styling */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  font-size: 1.4rem;
+}
+
+/* Results overlay - zen completion card */
 .results {
   text-align: center;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-2xl);
   background: var(--bg-secondary);
-  border-radius: 8px;
-  border: 1px solid var(--bg-tertiary);
+  border: 1px solid rgba(167, 173, 141, 0.15);
+  border-radius: 2rem;
+  backdrop-filter: blur(12px);
 }
 
 .results h2 {
-  font-size: 1.25rem;
-  margin-bottom: var(--spacing-md);
-  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-bottom: var(--spacing-lg);
+  color: var(--accent);
+  text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
 }
 
 .results-stats {
   display: flex;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-2xl);
   justify-content: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
 }
 
-/* Focus indicator */
-.typing-area:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+.results-stats .stat-value {
+  font-size: 2.25rem;
 }
 
-/* Click to focus message - overlay that doesn't affect layout */
+/* Focus indicator - zen overlay */
 .focus-message {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(22, 33, 62, 0.85);
-  border-radius: 8px;
+  background: rgba(26, 36, 33, 0.92);
+  border-radius: 2rem;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   cursor: pointer;
   z-index: 10;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(6px);
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
 }
 
-/* Skeleton loading */
+/* Skeleton loading - zen pulse */
 .word-skeleton {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
   padding: 1rem 0;
-  min-height: 120px;
+  min-height: 160px;
   justify-content: center;
 }
 
 .skeleton-line {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   justify-content: center;
 }
 
 .skeleton-line span {
-  height: 1.5rem;
+  height: 1.8rem;
   background: var(--text-muted);
-  border-radius: 4px;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 10px;
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
 }
 
-.skeleton-line span:nth-child(1) {
-  width: 4rem;
-}
-.skeleton-line span:nth-child(2) {
-  width: 3rem;
-  animation-delay: 0.1s;
-}
-.skeleton-line span:nth-child(3) {
-  width: 5rem;
-  animation-delay: 0.2s;
-}
-.skeleton-line span:nth-child(4) {
-  width: 3.5rem;
-  animation-delay: 0.3s;
-}
+.skeleton-line span:nth-child(1) { width: 5rem; }
+.skeleton-line span:nth-child(2) { width: 4rem; animation-delay: 0.15s; }
+.skeleton-line span:nth-child(3) { width: 6rem; animation-delay: 0.3s; }
+.skeleton-line span:nth-child(4) { width: 4.5rem; animation-delay: 0.45s; }
 
 @keyframes skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.6;
-  }
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.2; }
 }
 
 /* Offline notice */
 .offline-notice {
   text-align: center;
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   margin-bottom: var(--spacing-sm);
+  letter-spacing: 0.08em;
+  opacity: 0.6;
 }
 
 .offline-notice button {
@@ -504,49 +929,66 @@ body {
   border: none;
   cursor: pointer;
   text-decoration: underline;
-  font-size: 0.75rem;
+  font-size: inherit;
   margin-left: var(--spacing-xs);
 }
 
-.offline-notice button:hover {
-  opacity: 0.8;
-}
-
-/* Word fade-in */
+/* Word fade-in animation */
 .words-enter {
-  animation: words-fade-in 0.15s ease;
+  animation: words-fade-in 0.25s ease;
 }
 
 @keyframes words-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+  .stats, .stats-right {
+    position: static;
+    flex-direction: row;
+    gap: var(--spacing-xl);
+    opacity: 1;
+  }
+
+  .stats-right {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .app {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
   }
 
   .words-display {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
   }
 
   .key {
-    width: 32px;
-    height: 32px;
-    font-size: 0.75rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.55rem;
   }
 
   .key.spacebar {
-    width: 200px;
+    width: 150px;
   }
 
-  .stat-value {
-    font-size: 2rem;
+  .header h1 {
+    font-size: 2.25rem;
+  }
+
+  .finger-indicator {
+    gap: var(--spacing-md);
+  }
+
+  .finger-label {
+    font-size: 0.65rem;
+  }
+
+  .typing-area {
+    border-radius: 1.5rem;
   }
 }

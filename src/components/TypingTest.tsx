@@ -4,6 +4,7 @@ import { Keyboard, FingerLegend } from "./Keyboard.tsx";
 import { WordDisplay } from "./WordDisplay.tsx";
 import { WordSkeleton, OfflineNotice } from "./WordSkeleton.tsx";
 import { FingerIndicator } from "./FingerIndicator.tsx";
+import { InlineKeyboard } from "./InlineKeyboard.tsx";
 import { Hand } from "../core/keyboard/layout.ts";
 import { getRandomWords } from "../core/words/filter.ts";
 import { LEFT_HAND_WORDS, RIGHT_HAND_WORDS, COMMON_WORDS } from "../core/words/wordlist.ts";
@@ -307,33 +308,46 @@ export function TypingTest() {
     inputRef.current?.focus();
   }, []);
 
+  const getModeLabel = () => {
+    switch (state.mode) {
+      case "left": return "left hand training";
+      case "right": return "right hand training";
+      default: return "all fingers";
+    }
+  };
+
   return (
     <div className="app">
-      <header className="header">
-        <h1>typing</h1>
-        <p>improve your words per minute</p>
-      </header>
-
+      {/* Corner stats - left */}
       <div className="stats">
         <div className="stat">
+          <div className="stat-label">Speed</div>
           <div className="stat-value">
-            {state.isComplete ? wpm : state.session.isRunning ? wpm : "-"}
+            {state.isComplete ? wpm : state.session.isRunning ? wpm : "—"} <span>wpm</span>
           </div>
-          <div className="stat-label">wpm</div>
-        </div>
-        <div className="stat">
-          <div className="stat-value">
-            {state.session.isRunning || state.isComplete ? `${accuracy}%` : "-"}
-          </div>
-          <div className="stat-label">accuracy</div>
-        </div>
-        <div className="stat">
-          <div className="stat-value">
-            {state.currentWordIndex}/{state.words.length}
-          </div>
-          <div className="stat-label">words</div>
         </div>
       </div>
+
+      {/* Corner stats - right */}
+      <div className="stats-right">
+        <div className="stat stat-right">
+          <div className="stat-label">Accuracy</div>
+          <div className="stat-value">
+            {state.session.isRunning || state.isComplete ? accuracy : "—"}<span>%</span>
+          </div>
+        </div>
+        <div className="stat stat-right">
+          <div className="stat-label">Progress</div>
+          <div className="stat-value">
+            {state.currentWordIndex}<span>/{state.words.length}</span>
+          </div>
+        </div>
+      </div>
+
+      <header className="header">
+        <h1>Zen Flow</h1>
+        <p>{getModeLabel()}</p>
+      </header>
 
       <div className="mode-selector">
         <button
@@ -341,21 +355,21 @@ export function TypingTest() {
           onClick={() => handleModeChange("all")}
           onMouseDown={(e) => e.preventDefault()}
         >
-          all words
+          All
         </button>
         <button
           className={`mode-btn ${state.mode === "left" ? "active" : ""}`}
           onClick={() => handleModeChange("left")}
           onMouseDown={(e) => e.preventDefault()}
         >
-          left hand
+          Left Hand
         </button>
         <button
           className={`mode-btn ${state.mode === "right" ? "active" : ""}`}
           onClick={() => handleModeChange("right")}
           onMouseDown={(e) => e.preventDefault()}
         >
-          right hand
+          Right Hand
         </button>
       </div>
 
@@ -390,43 +404,59 @@ export function TypingTest() {
                 currentWordIndex={state.currentWordIndex}
                 currentCharIndex={state.currentCharIndex}
                 typedChars={state.typedChars}
-                showFingerHints={state.mode !== "all"}
+                showFingerHints={true}
+                showInlineKeyHint={false}
               />
             </div>
+            {state.mode !== "all" && !state.isComplete && (
+              <InlineKeyboard activeKey={currentChar} mode={state.mode} />
+            )}
           </>
         )}
       </div>
 
       {state.isComplete && (
         <div className="results">
-          <h2>Test Complete!</h2>
+          <h2>Complete</h2>
           <div className="results-stats">
             <div className="stat">
-              <div className="stat-value">{wpm}</div>
-              <div className="stat-label">wpm</div>
+              <div className="stat-label">Speed</div>
+              <div className="stat-value">{wpm} <span>wpm</span></div>
             </div>
             <div className="stat">
-              <div className="stat-value">{accuracy}%</div>
-              <div className="stat-label">accuracy</div>
+              <div className="stat-label">Accuracy</div>
+              <div className="stat-value">{accuracy}<span>%</span></div>
             </div>
             <div className="stat">
-              <div className="stat-value">{Math.round(duration / 1000)}s</div>
-              <div className="stat-label">time</div>
+              <div className="stat-label">Time</div>
+              <div className="stat-value">{Math.round(duration / 1000)}<span>s</span></div>
             </div>
           </div>
-          <button className="btn" onClick={handleRestart} onMouseDown={(e) => e.preventDefault()}>
-            Try Again
+          <button
+            className="btn"
+            onClick={handleRestart}
+            onMouseDown={(e) => e.preventDefault()}
+            title="Try Again"
+          >
+            <span className="material-symbols-outlined">replay</span>
           </button>
         </div>
       )}
 
       <div className="controls">
-        <button className="btn btn-secondary" onClick={handleRestart} onMouseDown={(e) => e.preventDefault()}>
-          Restart
+        <button
+          className="btn"
+          onClick={handleRestart}
+          onMouseDown={(e) => e.preventDefault()}
+          title="Restart"
+        >
+          <span className="material-symbols-outlined">replay</span>
         </button>
       </div>
 
-      <Keyboard activeKey={currentChar} showFingerColors={true} mode={state.mode} />
+      {state.mode === "all" && (
+        <Keyboard activeKey={currentChar} showFingerColors={true} mode={state.mode} />
+      )}
       {state.mode !== "all" && <FingerLegend mode={state.mode} />}
     </div>
   );

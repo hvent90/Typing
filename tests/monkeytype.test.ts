@@ -199,3 +199,31 @@ describe("MonkeyType Word Fetcher", () => {
     });
   });
 });
+
+describe("Real data integration test", () => {
+  test("fetchLeftHandWords returns no words with right-hand letters", async () => {
+    // Actually fetch from MonkeyType (no mock)
+    const result = await Effect.runPromise(fetchLeftHandWords("english_1k"));
+
+    const RIGHT_HAND_LETTERS = ["y", "u", "i", "o", "p", "h", "j", "k", "l", "n", "m"];
+
+    const invalidWords = result.filter((word) =>
+      [...word].some((char) => RIGHT_HAND_LETTERS.includes(char.toLowerCase())),
+    );
+
+    expect(invalidWords).toEqual([]);
+  });
+
+  test("fetchRightHandWords returns no words with left-hand letters", async () => {
+    // Actually fetch from MonkeyType (no mock)
+    const result = await Effect.runPromise(fetchRightHandWords("english_1k"));
+
+    const LEFT_HAND_LETTERS = ["q", "w", "e", "r", "t", "a", "s", "d", "f", "g", "z", "x", "c", "v", "b"];
+
+    const invalidWords = result.filter((word) =>
+      [...word].some((char) => LEFT_HAND_LETTERS.includes(char.toLowerCase())),
+    );
+
+    expect(invalidWords).toEqual([]);
+  });
+});
