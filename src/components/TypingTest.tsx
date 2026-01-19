@@ -25,9 +25,9 @@ type Mode = "all" | "left" | "right";
 interface TestState {
   mode: Mode;
   words: string[];
-  currentWordIndex: number;
-  currentCharIndex: number;
-  typedChars: Map<string, boolean>;
+  text: string; // words joined by spaces - the canonical input sequence
+  currentPosition: number; // index into text
+  typedChars: Map<number, boolean>; // position -> isCorrect
   session: TimingSessionState;
   isComplete: boolean;
   isFocused: boolean;
@@ -67,14 +67,41 @@ async function fetchWordsForMode(mode: Mode): Promise<string[]> {
   }
 }
 
+// Convert a position in the joined text to word and character indices
+function positionToIndices(
+  words: string[],
+  position: number
+): { wordIndex: number; charIndex: number } {
+  let remaining = position;
+  for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+    const wordLen = words[wordIndex].length;
+    if (remaining < wordLen) {
+      return { wordIndex, charIndex: remaining };
+    }
+    remaining -= wordLen;
+    // Account for space after word (except last word)
+    if (wordIndex < words.length - 1) {
+      if (remaining === 0) {
+        // Position is at the space after this word
+        return { wordIndex, charIndex: wordLen }; // charIndex at word length means "at space"
+      }
+      remaining -= 1; // skip the space
+    }
+  }
+  // Past the end
+  const lastWordIndex = words.length - 1;
+  return { wordIndex: lastWordIndex, charIndex: words[lastWordIndex]?.length ?? 0 };
+}
+
 function initialState(mode: Mode = "all"): TestState {
   // Use cached words if available, otherwise start with fallback
   const cached = wordCache.get(mode);
+  const words = cached ? getRandomWords(cached, WORD_COUNT) : getFallbackWords(mode);
   return {
     mode,
-    words: cached ? getRandomWords(cached, WORD_COUNT) : getFallbackWords(mode),
-    currentWordIndex: 0,
-    currentCharIndex: 0,
+    words,
+    text: words.join(" "),
+    currentPosition: 0,
     typedChars: new Map(),
     session: TimingSession.create(),
     isComplete: false,
@@ -88,14 +115,23 @@ export function TypingTest() {
   const [state, setState] = useState<TestState>(() => initialState());
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const currentWord = state.words[state.currentWordIndex] ?? "";
-  const currentChar = currentWord[state.currentCharIndex];
+  // Derive word/char indices from position for display purposes
+  const { wordIndex: currentWordIndex, charIndex: currentCharIndex } = positionToIndices(
+    state.words,
+    state.currentPosition
+  );
+  const currentChar = state.text[state.currentPosition];
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (state.isComplete) return;
 
       const key = e.key;
+
+      // Prevent space from scrolling
+      if (key === " ") {
+        e.preventDefault();
+      }
 
       // Start timer on first keystroke
       setState((prev) => {
@@ -105,40 +141,15 @@ export function TypingTest() {
         return prev;
       });
 
-      if (key === " ") {
-        e.preventDefault();
-        // Move to next word
-        setState((prev) => {
-          if (prev.currentCharIndex === 0) return prev; // Don't skip empty words
-
-          const nextWordIndex = prev.currentWordIndex + 1;
-          if (nextWordIndex >= prev.words.length) {
-            // Test complete
-            return {
-              ...prev,
-              isComplete: true,
-              session: TimingSession.stop(prev.session),
-            };
-          }
-
-          return {
-            ...prev,
-            currentWordIndex: nextWordIndex,
-            currentCharIndex: 0,
-          };
-        });
-        return;
-      }
-
       if (key === "Backspace") {
         e.preventDefault();
         setState((prev) => {
-          if (prev.currentCharIndex > 0) {
+          if (prev.currentPosition > 0) {
             const newTypedChars = new Map(prev.typedChars);
-            newTypedChars.delete(`${prev.currentWordIndex}-${prev.currentCharIndex - 1}`);
+            newTypedChars.delete(prev.currentPosition - 1);
             return {
               ...prev,
-              currentCharIndex: prev.currentCharIndex - 1,
+              currentPosition: prev.currentPosition - 1,
               typedChars: newTypedChars,
             };
           }
@@ -147,48 +158,38 @@ export function TypingTest() {
         return;
       }
 
-      // Only process single characters
+      // Only process single printable characters (including space)
       if (key.length !== 1) return;
 
       setState((prev) => {
-        const word = prev.words[prev.currentWordIndex];
-        if (!word) return prev;
+        // Already at end of text
+        if (prev.currentPosition >= prev.text.length) {
+          return prev;
+        }
 
-        const expectedChar = word[prev.currentCharIndex];
+        const expectedChar = prev.text[prev.currentPosition];
         const isCorrect = key === expectedChar;
 
         const newTypedChars = new Map(prev.typedChars);
-        newTypedChars.set(`${prev.currentWordIndex}-${prev.currentCharIndex}`, isCorrect);
+        newTypedChars.set(prev.currentPosition, isCorrect);
 
         const newSession = TimingSession.addCharacter(prev.session, isCorrect);
+        const nextPosition = prev.currentPosition + 1;
 
-        const nextCharIndex = prev.currentCharIndex + 1;
-
-        // Check if word is complete
-        if (nextCharIndex >= word.length) {
-          const nextWordIndex = prev.currentWordIndex + 1;
-          if (nextWordIndex >= prev.words.length) {
-            // Test complete
-            return {
-              ...prev,
-              typedChars: newTypedChars,
-              session: TimingSession.stop(newSession),
-              isComplete: true,
-            };
-          }
-          // Auto-advance to next word
+        // Check if test is complete
+        if (nextPosition >= prev.text.length) {
           return {
             ...prev,
-            currentWordIndex: nextWordIndex,
-            currentCharIndex: 0,
+            currentPosition: nextPosition,
             typedChars: newTypedChars,
-            session: newSession,
+            session: TimingSession.stop(newSession),
+            isComplete: true,
           };
         }
 
         return {
           ...prev,
-          currentCharIndex: nextCharIndex,
+          currentPosition: nextPosition,
           typedChars: newTypedChars,
           session: newSession,
         };
@@ -221,11 +222,13 @@ export function TypingTest() {
     setState((prev) => ({ ...prev, isLoading: true, fetchError: null }));
 
     fetchWordsForMode(state.mode)
-      .then((words) => {
-        wordCache.set(state.mode, words);
+      .then((fetchedWords) => {
+        wordCache.set(state.mode, fetchedWords);
+        const newWords = getRandomWords(fetchedWords, WORD_COUNT);
         setState((prev) => ({
           ...prev,
-          words: getRandomWords(words, WORD_COUNT),
+          words: newWords,
+          text: newWords.join(" "),
           isLoading: false,
           fetchError: null,
         }));
@@ -246,9 +249,14 @@ export function TypingTest() {
 
   // Calculate stats
   const duration = TimingSession.getDuration(state.session);
-  const wpm =
+  const correctChars = state.session.characterCount - state.session.errorCount;
+  const grossWpm =
     state.session.characterCount > 0
       ? Effect.runSync(calculateWPM(state.session.characterCount, Math.max(duration, 1)))
+      : 0;
+  const netWpm =
+    correctChars > 0
+      ? Effect.runSync(calculateWPM(correctChars, Math.max(duration, 1)))
       : 0;
 
   const accuracy =
@@ -263,9 +271,11 @@ export function TypingTest() {
     // Check cache first - instant if available
     const cached = wordCache.get(state.mode);
     if (cached) {
+      const newWords = getRandomWords(cached, WORD_COUNT);
       setState((prev) => ({
         ...prev,
-        words: getRandomWords(cached, WORD_COUNT),
+        words: newWords,
+        text: newWords.join(" "),
         isLoading: false,
         fetchError: null,
       }));
@@ -275,12 +285,14 @@ export function TypingTest() {
     setState((prev) => ({ ...prev, isLoading: true, fetchError: null }));
 
     fetchWordsForMode(state.mode)
-      .then((words) => {
+      .then((fetchedWords) => {
         if (!cancelled) {
-          wordCache.set(state.mode, words); // Cache for later
+          wordCache.set(state.mode, fetchedWords); // Cache for later
+          const newWords = getRandomWords(fetchedWords, WORD_COUNT);
           setState((prev) => ({
             ...prev,
-            words: getRandomWords(words, WORD_COUNT),
+            words: newWords,
+            text: newWords.join(" "),
             isLoading: false,
           }));
         }
@@ -292,6 +304,7 @@ export function TypingTest() {
           setState((prev) => ({
             ...prev,
             words: fallback,
+            text: fallback.join(" "),
             isLoading: false,
             fetchError: "offline",
           }));
@@ -323,8 +336,13 @@ export function TypingTest() {
         <div className="stat">
           <div className="stat-label">Speed</div>
           <div className="stat-value">
-            {state.isComplete ? wpm : state.session.isRunning ? wpm : "—"} <span>wpm</span>
+            {state.isComplete ? netWpm : state.session.isRunning ? netWpm : "—"} <span>wpm</span>
           </div>
+          {(state.session.isRunning || state.isComplete) && grossWpm !== netWpm && (
+            <div className="stat-secondary">
+              {grossWpm} <span>raw</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -339,7 +357,7 @@ export function TypingTest() {
         <div className="stat stat-right">
           <div className="stat-label">Progress</div>
           <div className="stat-value">
-            {state.currentWordIndex}<span>/{state.words.length}</span>
+            {currentWordIndex}<span>/{state.words.length}</span>
           </div>
         </div>
       </div>
@@ -400,9 +418,8 @@ export function TypingTest() {
             {state.fetchError && <OfflineNotice onRetry={handleRetry} />}
             <div className="words-enter">
               <WordDisplay
-                words={state.words}
-                currentWordIndex={state.currentWordIndex}
-                currentCharIndex={state.currentCharIndex}
+                text={state.text}
+                currentPosition={state.currentPosition}
                 typedChars={state.typedChars}
                 showFingerHints={true}
                 showInlineKeyHint={false}
@@ -421,7 +438,12 @@ export function TypingTest() {
           <div className="results-stats">
             <div className="stat">
               <div className="stat-label">Speed</div>
-              <div className="stat-value">{wpm} <span>wpm</span></div>
+              <div className="stat-value">{netWpm} <span>wpm</span></div>
+              {grossWpm !== netWpm && (
+                <div className="stat-secondary">
+                  {grossWpm} <span>raw</span>
+                </div>
+              )}
             </div>
             <div className="stat">
               <div className="stat-label">Accuracy</div>

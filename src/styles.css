@@ -215,6 +215,19 @@ body {
   opacity: 0.55;
 }
 
+.stat-secondary {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+.stat-secondary span {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
 /* Mode selector - elegant underlined tabs */
 .mode-selector {
   display: flex;
